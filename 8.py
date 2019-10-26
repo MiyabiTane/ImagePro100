@@ -10,6 +10,7 @@ def max_p(img):
                 out[8*i:8*(i+1),8*j:8*(j+1),c]=np.max(out[8*i:8*(i+1),8*j:8*(j+1),c]).astype(np.uint8)
     return out
 
+
 img=cv2.imread("imori.jpg")
 out=max_p(img)
 cv2.imwrite("./output_image/output8.jpg",out)
