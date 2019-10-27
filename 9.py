@@ -15,6 +15,7 @@ def gaussian_filter(img,K_size=3,sigma=1.3):
     for w in range(1,W+1):
         for h in range(H,H+1):
             for c in range(C):
+                #outの要素一つ一つとKの掛け算をしている。それらの和。
                 out2[w,h,c]=np.sum(out[w-1:w+2,h-1:h+2,c]*K)
                 #np.dot(out[w-1:w+2,h-1:h+2,c],K)
     out2=out2[1:H+1,1:W+1].astype(np.uint8)
