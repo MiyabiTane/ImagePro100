@@ -12,7 +12,7 @@ img[:,:,0]=Y
 img[:,:,1]=Y
 img[:,:,2]=Y
 
-cv2.imwrite("output2.jpg",img)
+cv2.imwrite("./output_image/output2.jpg",img)
 cv2.imshow("result", img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
