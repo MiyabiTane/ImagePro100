@@ -36,7 +36,7 @@ def laplacian_fil(img):
 img=cv2.imread("imori.jpg")
 gray_img=to_gray(img)
 out2=laplacian_fil(gray_img)
-cv2.imwrite("./output_image/output16.jpg",out2)
+cv2.imwrite("./output_image/output17.jpg",out2)
 cv2.imshow("result1",out2)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
