@@ -1,3 +1,4 @@
+#そのままの配列で変換すれば良い。
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,12 +10,14 @@ def transform(img):
     a=0
     b=255
 
-    img_range[np.where(img_range<c)]=a
-    img_range[np.where((c<=img_range) & (img_range<d))]=(b-c)*(img_range[np.where((c<=img_range) & (img_range<d))]-c)/(d-c)+a
-    img_range[np.where(d<=img_range)]=b
+    img=(b-c)*(img-c)/(d-c)+a
+    #テキストが間違ってるので注意
+    img[np.where(img<a)]=a
+    img[np.where(b<=img)]=b
 
-    out=img_range.reshape(img.shape)
-    return out
+    img=img.astype(np.uint8)
+
+    return img
 
 img=cv2.imread("imori_dark.jpg").astype(np.float)
 img_n=transform(img)
