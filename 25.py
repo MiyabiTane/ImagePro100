@@ -3,17 +3,17 @@ import numpy as np
 
 def expand_i(img,a=1.5):
     H,W,C=img.shape
-    out=np.zeros((int(H*a),int(W*a),C),dtype=np.float)
+    #out=np.zeros((int(H*a),int(W*a),C),dtype=np.float)
+    aH=int(H*a);aW=int(W*a)
 
-    for h in range(int(H*a)):
-        for w in range(int(W*a)):
-            for c in range(C):
-                #round->四捨五入
-                if h==0:
-                    out[0,0,c]=img[0,0,c]
-                else:
-                    out[h,w,c]=img[np.round((h/(a*h)).astype(np.int)),np.round((w,(a*w)).astype(np.int)),c]
+    x=np.arange(aH).repeat(aW).reshape(aW,-1)
+    y=np.tile(np.arange(aW),(aH,1))
+    x=np.round(x/a).astype(np.int)
+    y=np.round(y/a).astype(np.int)
+
+    out=img[x,y]
     out=out.astype(np.uint8)
+
     return out
 
 img=cv2.imread("imori.jpg").astype(np.float)
@@ -22,3 +22,18 @@ cv2.imwrite("./output_image/output25.jpg",img_n)
 cv2.imshow("result1",img_n)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+"""---メモ---
+詳しくは25-test.pyを見ること
+>>> aH=3;aW=3
+>>> y = np.arange(aH).repeat(aW).reshape(aW, -1)
+>>> y
+array([[0, 0, 0],
+       [1, 1, 1],
+       [2, 2, 2]])
+>>> x = np.tile(np.arange(aW), (aH, 1))
+>>> x
+array([[0, 1, 2],
+       [0, 1, 2],
+       [0, 1, 2]])
+"""
