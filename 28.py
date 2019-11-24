@@ -10,8 +10,12 @@ def affine_hor(img,tx=30,ty=-30):
             #元画像上の座標
             [x,y]=np.dot([[1,0],[0,1]],[i,j])-[tx,ty]
             #変換後の座標
-            new=np.dot([[1,0,tx],[0,1,ty],[0,0,1]],[x,y,1])
-            out[j,i]=img[new[1],new[0]]
+            #new=np.dot([[1,0,tx],[0,1,ty],[0,0,1]],[x,y,1])
+            if x>W-2:
+                x=W-2
+            if y>H-2:
+                y=H-2
+            out[j,i]=img[y,x]
 
     out=out[1:H+1,1:W+1,:]
     out=np.clip(out,0,255)
