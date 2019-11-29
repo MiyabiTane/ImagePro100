@@ -1,4 +1,4 @@
-# ImagePro100
+# 画像処理100本ノック
 問題1~25
 ```python
 img=cv2.imread("○○.jpg").astype(np.float)
