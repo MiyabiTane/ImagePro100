@@ -41,8 +41,7 @@ def ryosika(dct):
     for y in range(step_h):
         for x in range(step_w):
             for c in range(C):
-                out[8*y:8*(y+1),8*x:8*(x+1),c]=np.round(img[y:y+8,x:x+8,c]/Q)
-                out[8*y:8*(y+1),8*x:8*(x+1),c]=out[8*y:8*(y+1),8*x:8*(x+1),c]*Q
+                out[8*y:8*(y+1),8*x:8*(x+1),c]=np.round(dct[8*y:8*(y+1),8*x:8*(x+1),c]/Q)*Q
     return out
 
 def IDCT(img,T=8,K=4):
