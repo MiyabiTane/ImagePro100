@@ -55,18 +55,16 @@ def sobel_fil(img):
     if len(img.shape)==3:
         H,W,C=img.shape
     else:
-        img=np.expand_dims(img,axis=-1)
-        H,W,C=img.shape
+        H,W=img.shape
     #0パディング
-    out=np.zeros((H+2,W+2,C),dtype=np.float)
+    out=np.zeros((H+2,W+2),dtype=np.float)
     out[1:H+1,1:W+1]=img.copy().astype(np.uint8)
     #縦方向
     K1=[[1.,2.,1.],[0.,0.,0.],[-1.,-2.,-1.]]
     out_tate=out.copy()
     for h in range(1,H+1):
         for w in range(1,W+1):
-            for c in range(C):
-                out_tate[h,w,c]=np.sum(out[h-1:h+2,w-1:w+2,c]*K1)
+            out_tate[h,w]=np.sum(out[h-1:h+2,w-1:w+2]*K1)
     out_tate=np.clip(out_tate,0,255)
     out_tate=out_tate[1:H+1,1:W+1].astype(np.uint8)
     #横方向
@@ -74,17 +72,20 @@ def sobel_fil(img):
     out_yoko=out.copy()
     for h in range(1,H+1):
         for w in range(1,W+1):
-            for c in range(C):
-                out_yoko[h,w,c]=np.sum(out[h-1:h+2,w-1:w+2,c]*K2)
+            out_yoko[h,w]=np.sum(out[h-1:h+2,w-1:w+2]*K2)
     out_yoko=np.clip(out_yoko,0,255)
     out_yoko=out_yoko[1:H+1,1:W+1].astype(np.uint8)
 
     return out_tate,out_yoko
 
 def make_edge(out_yoko,out_tate):
+    #これがないとうまく行かない
+    out_yoko=out_yoko.astype(np.float32)
+    out_tate=out_tate.astype(np.float32)
     edge=np.sqrt(out_yoko**2+out_tate**2)
     out_yoko=np.maximum(out_yoko,1e-5)
     angle=np.arctan(out_tate/out_yoko)
+    edge=np.clip(edge,0,255)
     return edge,angle
 
 def ryosika(angle):
@@ -99,25 +100,25 @@ def ryosika(angle):
     angle_out[np.where((112.5<angle) & (angle<=157.5))]=135
     return angle_out
 
-def NMS(angle,edge_o):
-    H,W,C=edge_o.shape
-    edge=np.zeros((H+2,W+2,C),dtype=np.float32)
-    edge[1:H+1,1:W+1]=edge_o.copy()
+def NMS(angle,edge):
+    H,W=angle.shape
+    #edge=np.zeros((H+2,W+2,C),dtype=np.float32)
+    #edge[1:H+1,1:W+1]=edge_o.copy()
     for y in range(H):
         for x in range(W):
             if angle[y,x]==0:
-                if max(max(edge[y,x],edge[y,x-1]),edge[y,x+1])!=edge[y,x]:
+                if max(edge[y,x],edge[y,max(0,x-1)],edge[y,min(W-1,x+1)])!=edge[y,x]:
                     edge[y,x]=0
             elif angle[y,x]==45:
-                if max(max(edge[y,x],edge[y+1,x-1]),edge[y-1,x+1])!=edge[y,x]:
+                if max(edge[y,x],edge[min(H-1,y+1),max(0,x-1)],edge[max(0,y-1),min(W-1,x+1)])!=edge[y,x]:
                     edge[y,x]=0
             elif angle[y,x]==90:
-                if max(max(edge[y,x],edge[y-1,x]),edge[y+1,x])!=edge[y,x]:
+                if max(edge[y,x],edge[max(0,y-1),x],edge[min(H-1,y+1),x])!=edge[y,x]:
                     edge[y,x]=0
             elif angle[y,x]==135:
-                if max(max(edge[y,x],edge[y-1,x-1]),edge[y+1,x+1])!=edge[y,x]:
+                if max(edge[y,x],edge[max(0,y-1),max(0,x-1)],edge[min(H-1,y+1),min(x+1,W-1)])!=edge[y,x]:
                     edge[y,x]=0
-    edge=edge[1:H+1,1:W+1]
+    #edge=edge[1:H+1,1:W+1]
     return edge
 
 
@@ -128,8 +129,11 @@ fy,fx=sobel_fil(img_3)
 edge_o,angle_o=make_edge(fx,fy)
 angle=ryosika(angle_o)
 edge=NMS(angle,edge_o)
+angle=angle.astype(np.uint8)
 edge=edge.astype(np.uint8)
+#cv2.imwrite("./output_image/output42_1.jpg",angle)
 cv2.imwrite("./output_image/output42.jpg",edge)
-cv2.imshow("result1",edge)
+cv2.imshow("result1",angle)
+cv2.imshow("result2",edge)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
