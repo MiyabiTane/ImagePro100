@@ -12,7 +12,7 @@ def Bgr2Gray(img):
     out=out.astype(np.uint8)
     return out
 
-def gaussian_filter(img,K_size=5,sigma=1.4):
+def gaussian_filter(img,K_size=5,sigma=1.3):
     if len(img.shape) == 3:
         H, W, C = img.shape
         gray = False
