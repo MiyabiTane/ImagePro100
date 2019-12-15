@@ -17,7 +17,6 @@ def SSD_matching(img,part):
                 y_bottom=y+h
     return x_left,x_right,y_up,y_bottom
 
-
 img_ori=cv2.imread("./input_image/imori.jpg")
 img=img_ori.astype(np.float32)
 part=cv2.imread("./input_image/imori_part.jpg").astype(np.float32)
