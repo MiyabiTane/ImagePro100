@@ -29,6 +29,21 @@ def labeling_4(img):
                 label[y,x]=n
             #ラベルづけされていたら
             else:
+                # replace min label index
+                _vs = [c1, c2]
+                vs = [a for a in _vs if a > 1]
+                v = min(vs)
+                label[y, x] = v
+
+                minv = v
+                for _v in vs:
+                    if lookup[_v] != 0:
+                        minv = min(minv, lookup[_v])
+                for _v in vs:
+                    lookup[_v] = minv
+
+            """
+            else:
                 if c1<2:
                     print("here,1 : {},{}".format(y,x))
                     label[y,x]=c2
@@ -43,7 +58,8 @@ def labeling_4(img):
                     print("here,4 : {},{}".format(y,x))
                     label[y,x]=c2
                     lookup[c1]=c2
-
+            """
+    print("lookup={}".format(lookup[:6]))
     #see lookup table
     for l in range(2,n+1):
         if lookup[l]!=0 and lookup[l]!=l:
@@ -54,11 +70,9 @@ def labeling_4(img):
     colors=[[234,145,152],[241,103,63],[ 51,204,204],[0,0,255],[255,0,0],[0,255,0],[255,255,0]]
     out=np.zeros((H,W,C),dtype=np.float32)
     print(n)
-    i=2
-    while i in label:
-        print(i)
-        out[label==i]=colors[i-2]
-        i+=1
+    #enumerate : indexとnumberを取得
+    for i, lut in enumerate(lookup[2:]):
+        out[label == (i+2)] = colors[lut-2]
 
     out=out.astype(np.uint8)
     return out
