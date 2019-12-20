@@ -23,10 +23,9 @@ def hog_step1(img):
             if gx==0:
                 gx=1e-6
             gy=img[min(H-1,y+1),x]-img[max(0,y-1),x]
-            mag[y,x]=np.sqrt(gx**2+gy**2)
-            ang[y,x]=np.arctan(gy/gx)
-            if ang[y,x]<0:
-                ang[y,x]+=np.pi
+    mag=np.sqrt(gx**2+gy**2)
+    ang=np.arctan(gy/gx)
+    ang[ang<0]+=np.pi
 
     th_ang=np.pi/9
     for i in range(9):
