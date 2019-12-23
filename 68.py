@@ -52,13 +52,13 @@ def make_hist(ang,N=8):
     return hist
 
 def nor_hist(hist,C=3,epsilon=1):
-    H,W,C=hist.shape
-    y_step=H//C
-    x_step=W//C
-    for y in range(y_step):
-        for x in range(x_step):
-            hist_C=hist[3*y:3*(y+1),3*x:3*(x+1)]
-            hist_C=hist_C/np.sqrt(np.sum(hist_C)+epsilon)
+    H,W,c=hist.shape
+    num=C//2
+    #hist_n=np.zeros((H,W),dtype=np.float32)
+    for y in range(H):
+        for x in range(W):
+            #問題文から読み取れないけど**2が必要
+            hist[y,x]=hist[y,x]/np.sqrt(np.sum(hist[max(y-num,0):min(y+num+1,H),max(x-num,0):min(x+num+1,W)]**2)+epsilon)
     return hist
 
 img=cv2.imread("./input_image/imori.jpg").astype(np.float32)
