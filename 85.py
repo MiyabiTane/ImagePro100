@@ -40,11 +40,13 @@ def MakeHist():
 
     return database,image_data
 
+
 def predict(test_index,database,image_data):
     #ヒストグラムの差を格納
     diff_list=[]
     for data in database:
-        diff=np.sum(np.abs(data[:-1]-data[test_index]))
+        diff=np.sum(np.abs(data[:-1]-database[test_index,:-1]))
+        #print(diff)
         #自分自身と比較しないため
         if diff==0:
             diff_list.append(1000000000000)
