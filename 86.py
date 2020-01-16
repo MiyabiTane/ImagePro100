@@ -1,81 +1,93 @@
 import cv2
 import numpy as np
-from glob import glob
 import matplotlib.pyplot as plt
+from glob import glob
 
-def ReduceColor(img):
-    img[np.where((0<=img) & (img<64))]=32
-    img[np.where((64<=img) & (img<128))]=96
-    img[np.where((128<=img) & (img<192))]=160
-    img[np.where((192<=img) & (img<256))]=224
+# Dicrease color
+def dic_color(img):
+    img //= 63
+    img = img * 64 + 32
     return img
 
-#ヒストグラム作成
-def MakeHist():
-    #条件を満たすファイル名・ディレクトリ（フォルダ）名などのパスの一覧をリストやイテレータで取得できる。
-    image_data=glob("./input_image/dataset/train_*")
-    #名前順にソート
-    image_data.sort()
-    #print(image_data)
+# Database
+def get_DB():
+    # get training image path
+    train = glob("./input_image/dataset/train_*")
+    train.sort()
 
-    database=np.zeros((10,13),dtype=np.int32)
-    num=0
-    four_num=[32,96,160,224]
-    for img in image_data:
-        read_img=cv2.imread(img)
-        data=ReduceColor(read_img)
-        #4値分類。B=[1,4],G=[5,8],R=[9,12]
+    # prepare database
+    db = np.zeros((len(train), 13), dtype=np.int32)
+
+    # prepare path database
+    pdb = []
+
+    # each image
+    for i, path in enumerate(train):
+        # read image
+        img = dic_color(cv2.imread(path))
+
+        #get histogram
         for j in range(4):
-            #print(num,four_num[j],j)
-            #print(database[num,j])
-            database[num,j]=len(np.where(data[:,:,0]==four_num[j])[0]) #B
-            database[num,j+4]=len(np.where(data[:,:,1]==four_num[j])[0]) #G
-            database[num,j+8]=len(np.where(data[:,:,2]==four_num[j])[0]) #R
-        #class格納
-        if "akahara" in img:
-            database[num,-1]=0
-        else:
-            database[num,-1]=1
-        num+=1
+            db[i, j] = len(np.where(img[..., 0] == (64 * j + 32))[0])
+            db[i, j+4] = len(np.where(img[..., 1] == (64 * j + 32))[0])
+            db[i, j+8] = len(np.where(img[..., 2] == (64 * j + 32))[0])
 
-    return database,image_data
+        # get class
+        if 'akahara' in path:
+            cls = 0
+        elif 'madara' in path:
+            cls = 1
 
+        # store class label
+        db[i, -1] = cls
 
-def predict(test_index,database,image_data):
+        # store image path
+        pdb.append(path)
+
+    return db, pdb
+
+# test
+def test_DB(db, pdb):
+    # get test image path
+    test = glob("./input_image/dataset/test_*")
+    test.sort()
     #正解した数
-    success=0
-    #ヒストグラムの差を格納
-    diff_list=[]
-    for data in database:
-        diff=np.sum(np.abs(data[:-1]-database[test_index,:-1]))
-        #print(diff)
-        #自分自身と比較しないため
-        if diff==0:
-            diff_list.append(1000000000000)
-        diff_list.append(diff)
-    pre=np.argmin(diff_list)
-    #結果を表示
-    test_name=image_data[test_index]
-    pre_name=image_data[pre]
-    cls=database[pre,-1]
+    suc=0
 
-    if database[test_index,-1]==database[pre,-1]:
-        success+=1
+    # each image
+    for path in test:
+        # read image
+        img = dic_color(cv2.imread(path))
 
-    if cls==0:
-        cls_name="akahara"
-    else:
-        cls_name="madara"
+        # get histogram
+        hist = np.zeros(12, dtype=np.int32)
+        for j in range(4):
+            hist[j] = len(np.where(img[..., 0] == (64 * j + 32))[0])
+            hist[j+4] = len(np.where(img[..., 1] == (64 * j + 32))[0])
+            hist[j+8] = len(np.where(img[..., 2] == (64 * j + 32))[0])
 
-    print("{} is similar >> {} ,Pred >> {}".format(test_name,pre_name,cls_name))
-    return success
+        # get histogram difference
+        difs = np.abs(db[:, :12] - hist)
+        difs = np.sum(difs, axis=1)
 
+        # get argmin of difference
+        pred_i = np.argmin(difs)
 
-database,image_data=MakeHist()
-test=[0,1,5,6]
-ac=0
-for t in test:
-    success=predict(t,database,image_data)
-    ac+=success
-accuracy=ac/len(test)
-print("Accuracy >> {}".format(accuracy))
+        # get prediction label
+        pred = db[pred_i, -1]
+
+        if pred == 0:
+            pl = "akahara"
+        elif pred == 1:
+            pl = "madara"
+
+        if pl in path:
+            suc+=1
+
+        print(path, "is similar >>", pdb[pred_i], " Pred >>", pl)
+
+    accuracy=suc/len(test)
+    print("Accuracy >> ",accuracy)
+
+db, pdb = get_DB()
+test_DB(db, pdb)
